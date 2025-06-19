@@ -1,26 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Chatbot Desktop App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f3f4f6;
-        }
-        h1 {
-            color: #4f46e5;
-        }
-        iframe {
-            width: 100%;
-            height: 90vh;
-            border: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Chatbot Desktop App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f0f2f5;
+    }
+    header {
+      background-color: #4f46e5;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+    iframe {
+      width: 100%;
+      height: calc(100vh - 50px);
+      border: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>💬 Chatbot Desktop App</h1>
-    <iframe src="http://localhost:8000"></iframe>
+  <header>
+    <h1>🤖 Chatbot Desktop App</h1>
+  </header>
+  <iframe src="http://localhost:8000"></iframe> <!-- Adjust port if needed -->
 </body>
 </html>
