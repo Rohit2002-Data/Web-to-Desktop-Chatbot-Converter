@@ -1,24 +1,16 @@
+import subprocess
 import os
 import shutil
-import subprocess
-from zipfile import ZipFile
 
-def package_app(project_path, framework):
-    desktop_dir = os.path.join(project_path, "desktop_build")
-    os.makedirs(desktop_dir, exist_ok=True)
+def build_backend_exe(build_dir):
+    launcher_py = os.path.join(build_dir, "launch_backend.py")
+    subprocess.run(["pyinstaller", "--onefile", launcher_py], check=True)
 
-    # Example: if it's a Django app, create run_server.py
-    with open(os.path.join(desktop_dir, "run_server.py"), "w") as f:
-        f.write("import os\nos.system('python manage.py runserver')")
+    exe_path = os.path.join("dist", "launch_backend.exe")
+    electron_dir = os.path.join(build_dir, "electron_app")
+    shutil.move(exe_path, os.path.join(electron_dir, "launch_backend.exe"))
 
-    # Use PyInstaller to generate executable
-    subprocess.run(["pyinstaller", "--onefile", "run_server.py"], cwd=desktop_dir)
-
-    # Zip result
-    output_zip = os.path.join(project_path, "ChatbotApp.zip")
-    with ZipFile(output_zip, "w") as zipf:
-        for root, _, files in os.walk(desktop_dir):
-            for file in files:
-                if file.endswith(".exe") or file == "run_server.py":
-                    zipf.write(os.path.join(root, file), arcname=file)
-    return output_zip
+def build_electron_app(build_dir):
+    electron_dir = os.path.join(build_dir, "electron_app")
+    subprocess.run(["npm", "install"], cwd=electron_dir, check=True)
+    subprocess.run(["npx", "electron-builder", "--win", "--x64"], cwd=electron_dir, check=True)
