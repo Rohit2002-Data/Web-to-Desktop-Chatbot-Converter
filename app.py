@@ -20,10 +20,12 @@ if uploaded_file:
         run_chatbot(app_dir, framework)
         st.success("🚀 Web app running at http://localhost:8000")
 
-    if st.button("🖥 Convert to Desktop App"):
+    if st.button("🖥 Convert to Desktop Installer"):
         build_dir = create_wrapper(app_dir, framework)
         st.success("✅ Desktop app structure created!")
 
         build_backend_exe(build_dir)
+        st.success("✅ Backend .exe built!")
+
         build_electron_app(build_dir)
-        st.success("🎉 EXE installer built in: `desktop_build/electron_app/dist/`")
+        st.success("🎉 Installer built! Check: desktop_build/electron_app/dist/")
