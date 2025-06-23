@@ -1,63 +1,24 @@
-import subprocess
 import os
 import shutil
+import subprocess
+from zipfile import ZipFile
 
-def build_backend_exe(build_dir):
-    launcher_py = os.path.join(build_dir, "launch_backend.py")
+def package_app(project_path, framework):
+    desktop_dir = os.path.join(project_path, "desktop_build")
+    os.makedirs(desktop_dir, exist_ok=True)
 
-    try:
-        # Run pyinstaller in build_dir so dist/ lands in a known place
-        result = subprocess.run(
-            ["pyinstaller", "--onefile", launcher_py],
-            cwd=build_dir,
-            check=True,
-            capture_output=True,
-            text=True
-        )
-        print("✅ PyInstaller STDOUT:")
-        print(result.stdout)
-        print("✅ PyInstaller STDERR (if any):")
-        print(result.stderr)
+    # Example: if it's a Django app, create run_server.py
+    with open(os.path.join(desktop_dir, "run_server.py"), "w") as f:
+        f.write("import os\nos.system('python manage.py runserver')")
 
-    except subprocess.CalledProcessError as e:
-        print("❌ PyInstaller failed!")
-        print("=== STDOUT ===")
-        print(e.stdout)
-        print("=== STDERR ===")
-        print(e.stderr)
-        raise RuntimeError("PyInstaller build failed. See output above.") from e
+    # Use PyInstaller to generate executable
+    subprocess.run(["pyinstaller", "--onefile", "run_server.py"], cwd=desktop_dir)
 
-    # Find the exe
-    dist_dir = os.path.join(build_dir, "dist")
-    exe_path = os.path.join(dist_dir, "launch_backend.exe")
-
-    if not os.path.exists(exe_path):
-        raise FileNotFoundError(f"❌ Could not find exe at {exe_path}")
-
-    # Move to electron folder
-    electron_dir = os.path.join(build_dir, "electron_app")
-    shutil.move(exe_path, os.path.join(electron_dir, "launch_backend.exe"))
-
-    # Cleanup
-    shutil.rmtree(os.path.join(build_dir, "build"), ignore_errors=True)
-    spec_file = os.path.join(build_dir, "launch_backend.spec")
-    if os.path.exists(spec_file):
-        os.remove(spec_file)
-
-def build_electron_app(build_dir):
-    electron_dir = os.path.join(build_dir, "electron_app")
-
-    try:
-        print("⚙ Running npm install...")
-        subprocess.run(["npm", "install"], cwd=electron_dir, check=True, capture_output=True, text=True)
-        print("⚙ Running electron-builder...")
-        subprocess.run(["npx", "electron-builder", "--win", "--x64"], cwd=electron_dir, check=True, capture_output=True, text=True)
-        print("✅ Electron app built successfully!")
-
-    except subprocess.CalledProcessError as e:
-        print("❌ Electron build failed!")
-        print("=== STDOUT ===")
-        print(e.stdout)
-        print("=== STDERR ===")
-        print(e.stderr)
-        raise RuntimeError("Electron build failed. See output above.") from e
+    # Zip result
+    output_zip = os.path.join(project_path, "ChatbotApp.zip")
+    with ZipFile(output_zip, "w") as zipf:
+        for root, _, files in os.walk(desktop_dir):
+            for file in files:
+                if file.endswith(".exe") or file == "run_server.py":
+                    zipf.write(os.path.join(root, file), arcname=file)
+    return output_zip
