@@ -3,7 +3,6 @@ from utils.file_handler import handle_upload
 from utils.framework_detector import detect_framework
 from utils.executor import run_chatbot
 from utils.wrapper_generator import create_wrapper
-from utils.packager import build_backend_exe, build_electron_app
 
 st.title("🤖 Web Chatbot → Desktop App Converter")
 
@@ -20,12 +19,8 @@ if uploaded_file:
         run_chatbot(app_dir, framework)
         st.success("🚀 Web app running at http://localhost:8000")
 
-    if st.button("🖥 Convert to Desktop Installer"):
-        build_dir = create_wrapper(app_dir, framework)
-        st.success("✅ Desktop app structure created!")
-
-        build_backend_exe(build_dir)
-        st.success("✅ Backend .exe built!")
-
-        build_electron_app(build_dir)
-        st.success("🎉 Installer built! Check: desktop_build/electron_app/dist/")
+    if st.button("🖥 Convert to Desktop App"):
+        exe_path = create_wrapper(app_dir, framework)
+        st.success("🎉 Desktop app created!")
+        with open(exe_path, "rb") as f:
+            st.download_button("Download Desktop App", f, file_name="chatbot_desktop.zip")
